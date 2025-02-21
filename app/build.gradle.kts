@@ -74,6 +74,8 @@ dependencies {
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
+    implementation ("androidx.room:room-paging:2.6.1")
+
 
     // ExoPlayer
     implementation("androidx.media3:media3-exoplayer:1.2.1")
@@ -86,10 +88,18 @@ dependencies {
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
     // Testing
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    testImplementation ("junit:junit:4.13.2")
+    testImplementation ("org.mockito:mockito-core:5.3.1")
+    testImplementation ("org.mockito.kotlin:mockito-kotlin:5.1.0")
+    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1")
+    testImplementation ("app.cash.turbine:turbine:1.0.0")
 
+    // Android Testing
+    androidTestImplementation ("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation ("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation ("androidx.compose.ui:ui-test-junit4:1.5.4")
+    androidTestImplementation ("com.google.dagger:hilt-android-testing:2.48")
+    kaptAndroidTest ("com.google.dagger:hilt-android-compiler:2.48")
     // Compose
     val composeBom = platform("androidx.compose:compose-bom:2024.02.00")
     implementation (composeBom)

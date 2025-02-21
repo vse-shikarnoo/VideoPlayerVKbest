@@ -3,6 +3,8 @@ package kv.compose.videoplayervk.data.paging
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import androidx.paging.RemoteMediator
+import androidx.paging.LoadType
 import kv.compose.videoplayervk.data.api.VideoApi
 import kv.compose.videoplayervk.data.local.VideoDao
 import kv.compose.videoplayervk.data.local.VideoEntity
@@ -14,22 +16,33 @@ import java.io.IOException
 class VideoRemoteMediator(
     private val api: VideoApi,
     private val dao: VideoDao
-) : PagingSource<Int, Video>() {
+) : RemoteMediator<Int, VideoEntity>() {
 
-    override fun getRefreshKey(state: PagingState<Int, Video>): Int? {
-        return state.anchorPosition?.let { anchorPosition ->
-            state.closestPageToPosition(anchorPosition)?.prevKey?.plus(1)
-                ?: state.closestPageToPosition(anchorPosition)?.nextKey?.minus(1)
-        }
-    }
-
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Video> {
+    override suspend fun load(
+        loadType: LoadType,
+        state: PagingState<Int, VideoEntity>
+    ): MediatorResult {
         return try {
-            val page = params.key ?: 1
-            val response = api.getVideos(page = page, pageSize = params.loadSize)
+            val page = when (loadType) {
+                LoadType.REFRESH -> 1
+                LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
+                LoadType.APPEND -> {
+                    val lastItem = state.lastItemOrNull()
+                    if (lastItem == null) {
+                        1
+                    } else {
+                        (state.pages.size + 1)
+                    }
+                }
+            }
 
-            // Преобразуем DTO в сущности и сохраняем в базу данных
-            val videoEntities = response.data.map { dto ->
+            val response = api.getVideos(page = page, pageSize = state.config.pageSize)
+
+            if (loadType == LoadType.REFRESH) {
+                dao.clearVideos()
+            }
+
+            val videos = response.data.map { dto ->
                 VideoEntity(
                     id = dto.id,
                     title = dto.title,
@@ -39,30 +52,14 @@ class VideoRemoteMediator(
                     timestamp = System.currentTimeMillis()
                 )
             }
-            
-            // Сохраняем видео в базу данных
-            dao.insertVideos(videoEntities)
 
-            // Преобразуем в domain модели для UI
-            val videos = videoEntities.map { entity ->
-                Video(
-                    id = entity.id,
-                    title = entity.title,
-                    thumbnailUrl = entity.thumbnailUrl,
-                    videoUrl = entity.videoUrl,
-                    duration = entity.duration
-                )
-            }
+            dao.insertVideos(videos)
 
-            LoadResult.Page(
-                data = videos,
-                prevKey = if (page == 1) null else page - 1,
-                nextKey = if (response.data.isEmpty()) null else page + 1
+            MediatorResult.Success(
+                endOfPaginationReached = response.data.isEmpty()
             )
-        } catch (e: IOException) {
-            LoadResult.Error(e)
-        } catch (e: HttpException) {
-            LoadResult.Error(e)
+        } catch (e: Exception) {
+            MediatorResult.Error(e)
         }
     }
 } 

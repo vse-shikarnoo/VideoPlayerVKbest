@@ -1,5 +1,6 @@
 package kv.compose.videoplayervk.data.local
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -22,4 +23,8 @@ interface VideoDao {
 
     @Query("DELETE FROM videos WHERE timestamp < :timestamp")
     suspend fun deleteOldVideos(timestamp: Long)
+
+    @Query("SELECT * FROM videos ORDER BY timestamp DESC")
+    fun getPagingSource(): PagingSource<Int, VideoEntity>
+
 } 

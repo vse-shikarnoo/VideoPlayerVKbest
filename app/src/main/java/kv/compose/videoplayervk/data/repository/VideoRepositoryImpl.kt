@@ -16,6 +16,8 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import kv.compose.videoplayervk.data.paging.VideosPagingSource
 import kv.compose.videoplayervk.data.paging.VideoRemoteMediator
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.map
 
 class VideoRepositoryImpl @Inject constructor(
     private val api: VideoApi,
@@ -62,6 +64,7 @@ class VideoRepositoryImpl @Inject constructor(
         return dao.getVideoById(id)?.toVideo()
     }
 
+    @OptIn(ExperimentalPagingApi::class)
     override fun getPagedVideos(): Flow<PagingData<Video>> {
         return Pager(
             config = PagingConfig(
@@ -69,12 +72,18 @@ class VideoRepositoryImpl @Inject constructor(
                 enablePlaceholders = false,
                 prefetchDistance = 2
             ),
-            pagingSourceFactory = {
-                VideoRemoteMediator(
-                    api = api,
-                    dao = dao
+            remoteMediator = VideoRemoteMediator(api, dao),
+            pagingSourceFactory = { dao.getPagingSource() }
+        ).flow.map { pagingData ->
+            pagingData.map { entity ->
+                Video(
+                    id = entity.id,
+                    title = entity.title,
+                    thumbnailUrl = entity.thumbnailUrl,
+                    videoUrl = entity.videoUrl,
+                    duration = entity.duration
                 )
             }
-        ).flow
+        }
     }
 } 
