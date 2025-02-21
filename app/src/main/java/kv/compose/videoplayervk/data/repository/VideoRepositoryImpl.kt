@@ -15,6 +15,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import kv.compose.videoplayervk.data.paging.VideosPagingSource
+import kv.compose.videoplayervk.data.paging.VideoRemoteMediator
 
 class VideoRepositoryImpl @Inject constructor(
     private val api: VideoApi,
@@ -68,7 +69,12 @@ class VideoRepositoryImpl @Inject constructor(
                 enablePlaceholders = false,
                 prefetchDistance = 2
             ),
-            pagingSourceFactory = { VideosPagingSource(api) }
+            pagingSourceFactory = {
+                VideoRemoteMediator(
+                    api = api,
+                    dao = dao
+                )
+            }
         ).flow
     }
 } 

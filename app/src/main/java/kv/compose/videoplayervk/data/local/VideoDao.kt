@@ -19,4 +19,7 @@ interface VideoDao {
 
     @Query("DELETE FROM videos")
     suspend fun clearVideos()
+
+    @Query("DELETE FROM videos WHERE timestamp < :timestamp")
+    suspend fun deleteOldVideos(timestamp: Long)
 } 
