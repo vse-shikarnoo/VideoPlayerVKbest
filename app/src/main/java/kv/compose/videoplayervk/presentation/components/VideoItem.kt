@@ -1,4 +1,4 @@
-package kv.compose.videoplayervk.presentation.videos.components
+package kv.compose.videoplayervk.presentation.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column

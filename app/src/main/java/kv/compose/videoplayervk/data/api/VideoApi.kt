@@ -9,7 +9,7 @@ interface VideoApi {
     @GET("/v1/videos/popular")
     suspend fun getVideos(
         @Header("Authorization") apiKey: String = "zG1cIlgK2yBZyscMTGujiqAFuJmodQjxRtXzAQ8v4qMYAipq3uKTjS1R",
-        @Query("per_page") perPage: Int = 20,
+        @Query("per_page") pageSize: Int = 20,
         @Query("page") page: Int = 1,
         @Query("min_duration") minDuration: Int = 0,
         @Query("max_duration") maxDuration: Int = 60

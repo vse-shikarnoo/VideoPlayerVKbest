@@ -11,6 +11,10 @@ import kv.compose.videoplayervk.data.local.VideoEntity
 import kv.compose.videoplayervk.domain.model.Video
 import kv.compose.videoplayervk.domain.repository.VideoRepository
 import javax.inject.Inject
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import kv.compose.videoplayervk.data.paging.VideosPagingSource
 
 class VideoRepositoryImpl @Inject constructor(
     private val api: VideoApi,
@@ -55,5 +59,16 @@ class VideoRepositoryImpl @Inject constructor(
 
     override suspend fun getVideo(id: String): Video? {
         return dao.getVideoById(id)?.toVideo()
+    }
+
+    override fun getPagedVideos(): Flow<PagingData<Video>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 20,
+                enablePlaceholders = false,
+                prefetchDistance = 2
+            ),
+            pagingSourceFactory = { VideosPagingSource(api) }
+        ).flow
     }
 } 

@@ -1,5 +1,6 @@
 package kv.compose.videoplayervk
 
+import AppNavigation
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -8,7 +9,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import dagger.hilt.android.AndroidEntryPoint
-import kv.compose.videoplayervk.presentation.navigation.NavGraph
 import kv.compose.videoplayervk.ui.theme.VideoPlayerVKTheme
 
 @AndroidEntryPoint
@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    NavGraph()
+                    AppNavigation()
                 }
             }
         }

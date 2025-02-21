@@ -122,5 +122,9 @@ dependencies {
     implementation ("androidx.media3:media3-ui:$media3_version")
     implementation ("androidx.media3:media3-common:$media3_version")
 
+    // Paging
+    implementation("androidx.paging:paging-runtime-ktx:3.2.1")
+    implementation("androidx.paging:paging-compose:3.2.1")
+
 
 }

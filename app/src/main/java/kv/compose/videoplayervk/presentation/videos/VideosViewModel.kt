@@ -10,63 +10,52 @@ import kotlinx.coroutines.launch
 import kv.compose.videoplayervk.domain.model.Video
 import kv.compose.videoplayervk.domain.repository.VideoRepository
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 
 @HiltViewModel
 class VideosViewModel @Inject constructor(
     private val repository: VideoRepository
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(VideosState())
-    val state = _state.asStateFlow()
+    private val _uiState = MutableStateFlow(VideosUiState())
+    val uiState = _uiState.asStateFlow()
 
-    init {
+    val videosFlow: Flow<PagingData<Video>> = repository.getPagedVideos()
+        .cachedIn(viewModelScope)
+
+    fun refresh() {
         viewModelScope.launch {
-            repository.getVideosFlow().collect { videos ->
-                _state.update { it.copy(
-                    videos = videos,
-                    isLoading = false
-                ) }
-            }
-        }
-        refreshVideos()
-    }
-
-    fun refreshVideos() {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
-
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            
             when (val result = repository.refreshVideos()) {
                 is NetworkResult.Success -> {
-                    _state.update { it.copy(isLoading = false, error = null) }
+                    _uiState.update { it.copy(isLoading = false, error = null) }
                 }
                 is NetworkResult.NetworkError -> {
-                    _state.update {
+                    _uiState.update { 
                         it.copy(
                             isLoading = false,
-                            error = "Отсутствует подключение к интернету. Проверьте соединение и попробуйте снова."
+                            error = "Отсутствует подключение к интернету"
                         )
                     }
                 }
                 is NetworkResult.Error -> {
-                    _state.update {
+                    _uiState.update { 
                         it.copy(
                             isLoading = false,
                             error = result.message
                         )
                     }
                 }
-                is NetworkResult.Loading -> {
-                    _state.update { it.copy(isLoading = true, error = null) }
-                }
-
-                else -> {}
+                else -> Unit
             }
         }
     }
 }
 
-data class VideosState(
-    val videos: List<Video> = emptyList(),
+data class VideosUiState(
     val isLoading: Boolean = false,
     val error: String? = null
 ) 

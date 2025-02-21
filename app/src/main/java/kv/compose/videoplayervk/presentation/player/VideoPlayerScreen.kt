@@ -38,6 +38,7 @@ import androidx.media3.ui.PlayerView as StyledPlayerView
 @OptIn(UnstableApi::class)
 @Composable
 fun VideoPlayerScreen(
+
     viewModel: VideoPlayerViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
