@@ -1,6 +1,6 @@
 package kv.compose.videoplayervk.presentation.navigation
 
-import kv.compose.videoplayervk.presentation.player.VideoPlayerScreen
+import NavigationAnimations
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import kv.compose.videoplayervk.presentation.player.VideoPlayerScreen
 import kv.compose.videoplayervk.presentation.videos.VideosScreen
 
 sealed class Screen(val route: String) {
@@ -25,19 +26,23 @@ fun NavGraph(
         navController = navController,
         startDestination = Screen.Videos.route
     ) {
-        composable(Screen.Videos.route) {
+        composable(Screen.Videos.route,
+            exitTransition = { NavigationAnimations.exitTransition },
+            popEnterTransition = { NavigationAnimations.popEnterTransition }) {
             VideosScreen(
                 onVideoClick = { videoId ->
                     navController.navigate(Screen.Player.createRoute(videoId))
                 }
             )
         }
-        
+
         composable(
             route = Screen.Player.route,
             arguments = listOf(
                 navArgument("videoId") { type = NavType.StringType }
-            )
+            ),
+            enterTransition = { NavigationAnimations.enterTransition },
+            popExitTransition = { NavigationAnimations.popExitTransition }
         ) {
             VideoPlayerScreen()
         }
