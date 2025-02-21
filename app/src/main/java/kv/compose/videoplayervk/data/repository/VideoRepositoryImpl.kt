@@ -1,5 +1,6 @@
 package kv.compose.videoplayervk.data.repository
 
+import NetworkResult
 import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -25,8 +26,8 @@ class VideoRepositoryImpl @Inject constructor(
             Log.e("VideoRepository", "Error getting videos", e)
         }
 
-    override suspend fun refreshVideos() {
-        try {
+    override suspend fun refreshVideos(): NetworkResult<Unit> {
+        return try {
             val response = api.getVideos().data
             val videos = response.map { dto ->
                 VideoEntity(
@@ -40,9 +41,15 @@ class VideoRepositoryImpl @Inject constructor(
             }
             dao.clearVideos()
             dao.insertVideos(videos)
+            NetworkResult.Success(Unit)
         } catch (e: Exception) {
             Log.e("VideoRepository", "Error refreshing videos", e)
-            throw e
+            when (e) {
+                is java.net.UnknownHostException,
+                is java.net.SocketTimeoutException,
+                is java.io.IOException -> NetworkResult.NetworkError()
+                else -> NetworkResult.Error(e.message ?: "Неизвестная ошибка")
+            }
         }
     }
 

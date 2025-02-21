@@ -34,13 +34,32 @@ class VideosViewModel @Inject constructor(
     fun refreshVideos() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
-            try {
-                repository.refreshVideos()
-            } catch (e: Exception) {
-                _state.update { it.copy(
-                    error = e.message ?: "Неизвестная ошибка",
-                    isLoading = false
-                ) }
+
+            when (val result = repository.refreshVideos()) {
+                is NetworkResult.Success -> {
+                    _state.update { it.copy(isLoading = false, error = null) }
+                }
+                is NetworkResult.NetworkError -> {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = "Отсутствует подключение к интернету. Проверьте соединение и попробуйте снова."
+                        )
+                    }
+                }
+                is NetworkResult.Error -> {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = result.message
+                        )
+                    }
+                }
+                is NetworkResult.Loading -> {
+                    _state.update { it.copy(isLoading = true, error = null) }
+                }
+
+                else -> {}
             }
         }
     }
