@@ -64,26 +64,15 @@ class VideoRepositoryImpl @Inject constructor(
         return dao.getVideoById(id)?.toVideo()
     }
 
-    @OptIn(ExperimentalPagingApi::class)
     override fun getPagedVideos(): Flow<PagingData<Video>> {
         return Pager(
             config = PagingConfig(
                 pageSize = 20,
                 enablePlaceholders = false,
-                prefetchDistance = 2
+                prefetchDistance = 1,
+                initialLoadSize = 20
             ),
-            remoteMediator = VideoRemoteMediator(api, dao),
-            pagingSourceFactory = { dao.getPagingSource() }
-        ).flow.map { pagingData ->
-            pagingData.map { entity ->
-                Video(
-                    id = entity.id,
-                    title = entity.title,
-                    thumbnailUrl = entity.thumbnailUrl,
-                    videoUrl = entity.videoUrl,
-                    duration = entity.duration
-                )
-            }
-        }
+            pagingSourceFactory = { VideosPagingSource(api) }
+        ).flow
     }
 } 

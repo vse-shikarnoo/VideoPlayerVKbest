@@ -8,39 +8,38 @@ import retrofit2.HttpException
 import java.io.IOException
 
 class VideosPagingSource(
-    private val api: VideoApi,
-    private val pageSize: Int = 20
+    private val api: VideoApi
 ) : PagingSource<Int, Video>() {
 
     override fun getRefreshKey(state: PagingState<Int, Video>): Int? {
         return state.anchorPosition?.let { anchorPosition ->
-            state.closestPageToPosition(anchorPosition)?.prevKey?.plus(1)
-                ?: state.closestPageToPosition(anchorPosition)?.nextKey?.minus(1)
+            val anchorPage = state.closestPageToPosition(anchorPosition)
+            anchorPage?.prevKey?.plus(1) ?: anchorPage?.nextKey?.minus(1)
         }
     }
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Video> {
         return try {
             val page = params.key ?: 1
-            val response = api.getVideos(page = page, pageSize = pageSize)
+            val response = api.getVideos(page = page)
+
+            val videos = response.data.map { dto ->
+                Video(
+                    id = dto.id,
+                    title = dto.title,
+                    thumbnailUrl = dto.thumbnailUrl,
+                    videoUrl = dto.videoUrl,
+                    duration = dto.duration.toLong()
+                )
+            }
 
             LoadResult.Page(
-                data = response.data.map { dto ->
-                    Video(
-                        id = dto.id,
-                        title = dto.title,
-                        thumbnailUrl = dto.thumbnailUrl,
-                        videoUrl = dto.videoUrl,
-                        duration = dto.duration.toLong()
-                    )
-                },
-                prevKey = if (page == 1) null else page - 1,
-                nextKey = if (response.data.isEmpty()) null else page + 1
+                data = videos,
+                prevKey = null, // Только вперед
+                nextKey = if (videos.isEmpty() || page >= 4) null else page + 1 // Pexels ограничивает до 4 страниц
             )
-        } catch (e: IOException) {
-            LoadResult.Error(e)
-        } catch (e: HttpException) {
+        } catch (e: Exception) {
             LoadResult.Error(e)
         }
     }
-} 
+}

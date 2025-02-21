@@ -1,5 +1,7 @@
 package kv.compose.videoplayervk.presentation.videos
 
+import android.app.Activity
+import android.content.pm.ActivityInfo
 import kv.compose.videoplayervk.presentation.components.ErrorView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -19,9 +21,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -42,6 +46,14 @@ fun VideosScreen(
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+
+    // Фиксируем портретную ориентацию при входе на экран
+    LaunchedEffect(Unit) {
+        val activity = context as? Activity
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    }
+
     val lazyPagingItems = videosFlow.collectAsLazyPagingItems()
     val pullRefreshState = rememberPullRefreshState(
         refreshing = uiState.isLoading,

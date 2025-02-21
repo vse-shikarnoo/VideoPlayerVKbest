@@ -31,7 +31,13 @@ class VideoRemoteMediator(
                     if (lastItem == null) {
                         1
                     } else {
-                        (state.pages.size + 1)
+                        // Получаем следующую страницу
+                        (state.pages.size + 1).also {
+                            // Если достигли лимита API Pexels (максимум 80 видео, то есть 4 страницы по 20)
+                            if (it > 4) {
+                                return MediatorResult.Success(endOfPaginationReached = true)
+                            }
+                        }
                     }
                 }
             }
@@ -55,11 +61,12 @@ class VideoRemoteMediator(
 
             dao.insertVideos(videos)
 
+            // Проверяем, достигнут ли конец списка
             MediatorResult.Success(
-                endOfPaginationReached = response.data.isEmpty()
+                endOfPaginationReached = response.data.isEmpty() || response.data.size < state.config.pageSize
             )
         } catch (e: Exception) {
             MediatorResult.Error(e)
         }
     }
-} 
+}
