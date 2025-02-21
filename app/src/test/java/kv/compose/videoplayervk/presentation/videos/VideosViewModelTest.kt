@@ -1,8 +1,13 @@
+package kv.compose.videoplayervk.presentation.videos
+
+import NetworkResult
 import app.cash.turbine.test
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
+import kv.compose.videoplayervk.domain.repository.VideoRepository
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.*
