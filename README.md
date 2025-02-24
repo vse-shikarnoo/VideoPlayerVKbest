@@ -1,6 +1,6 @@
 Демонстрация работы приложения - [https://drive.google.com/file/d/1OXwp9W2RuEq4BmfHmt4yTeH-gbv8_sks/view?usp=drive_link](https://drive.google.com/file/d/1Gk8lrJSf--FcyxfTL3PV10-8334CQn_g/view?usp=sharing)
 
-# 🎵 Видеоплеер на Kotlin (Jetpack Compose + Pexels API)
+# 🎦 Видеоплеер на Kotlin (Jetpack Compose + Pexels API)
 Приложение для поиска и воспроизведения видео с Pexels API, написанное на Kotlin с использованием
 Jetpack Compose.
 
